@@ -1,53 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Audiology Knowledge Base</title>
   <meta name="description" content="A searchable audiology glossary for non-audiology representatives." />
-  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
 </head>
 <body>
   <header class="hero">
     <nav class="topbar">
-      <a class="brand" href="#/">Audiology Knowledge Base</a>
-      <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+      <a class="brand" href="#">Audiology Knowledge Base</a>
+      <button id="themeToggle" class="ghost-button" type="button">Dark mode</button>
     </nav>
+
     <section class="hero-content">
-      <p class="eyebrow">Quick reference for sales professionals</p>
-      <h1>Search audiology terms, tests, and equipment.</h1>
-      <p class="subhead">A plain-English, spreadsheet-powered knowledge base for learning audiology vocabulary fast.</p>
-      <div class="search-wrap">
-        <input id="searchInput" type="search" placeholder="Search SRT, earmold, speech testing, ABR..." autocomplete="off" />
-        <button id="clearSearch" aria-label="Clear search">×</button>
+      <p class="eyebrow">Plain-language audiology reference</p>
+      <h1>Find terms, definitions, equipment, and related concepts fast.</h1>
+      <p class="subheading">Designed for non-audiology reps who need quick, practical explanations.</p>
+
+      <div class="search-panel">
+        <label for="searchInput" class="sr-only">Search terms</label>
+        <input id="searchInput" type="search" placeholder="Search SRT, tympanometry, speech testing, equipment..." autocomplete="off" />
+        <div id="suggestions" class="suggestions" aria-live="polite"></div>
       </div>
-      <div id="stats" class="stats"></div>
+
+      <div class="quick-actions">
+        <button class="pill active" data-filter="all">All terms</button>
+        <button class="pill" data-filter="featured">Featured</button>
+        <button class="pill" data-filter="az">A–Z Browse</button>
+      </div>
     </section>
   </header>
 
-  <main class="shell">
-    <section id="homeView">
-      <div class="section-title">
-        <h2>Browse by category</h2>
-        <button id="showAll" class="link-button">Show all terms</button>
-      </div>
-      <div id="categoryGrid" class="category-grid"></div>
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Categories</h2>
+        <div id="categoryFilters" class="filters"></div>
+      </section>
 
-      <div class="section-title spaced">
-        <h2 id="resultsHeading">Featured terms</h2>
-        <div id="resultCount" class="muted"></div>
+      <section class="panel stats-panel">
+        <h2>Library Stats</h2>
+        <div class="stat"><strong id="totalTerms">0</strong><span>Terms</span></div>
+        <div class="stat"><strong id="totalCategories">0</strong><span>Categories</span></div>
+      </section>
+    </aside>
+
+    <section class="content">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Results</p>
+          <h2 id="resultsTitle">All Terms</h2>
+        </div>
+        <p id="resultCount" class="result-count"></p>
       </div>
-      <div id="results" class="results-grid"></div>
+
+      <div id="azBar" class="az-bar hidden"></div>
+      <div id="results" class="cards"></div>
+      <div id="emptyState" class="empty hidden">
+        <h3>No matches found</h3>
+        <p>Try a different spelling, related concept, equipment name, or broader search term.</p>
+      </div>
     </section>
-
-    <section id="termView" class="term-view hidden"></section>
   </main>
 
-  <footer class="footer">
-    <p>Powered by <code>data/definitions.csv</code>. Edit your Excel file, export as CSV, and replace the CSV to update the site.</p>
+  <footer>
+    <p>Update this site by replacing <code>definitions.csv</code> in GitHub.</p>
   </footer>
 
-  <script src="assets/app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
