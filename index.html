@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audiology Knowledge Base</title>
+  <meta name="description" content="A searchable audiology glossary for sales and support professionals." />
+
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d9e0ea;
+      --primary: #136f63;
+      --primary-dark: #0d5149;
+      --chip: #e9f5f2;
+      --chip-text: #0d5149;
+      --warning: #fff6d8;
+      --shadow: 0 16px 40px rgba(21, 36, 57, 0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg: #101828;
+      --card: #182230;
+      --text: #f4f7fb;
+      --muted: #b4bfcc;
+      --line: #344054;
+      --primary: #38b2a3;
+      --primary-dark: #6de1d2;
+      --chip: #203c3a;
+      --chip-text: #b6fff4;
+      --warning: #3b3012;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    .hero {
+      padding: 56px 20px 34px;
+      background:
+        radial-gradient(circle at top left, rgba(19,111,99,.18), transparent 28rem),
+        linear-gradient(135deg, rgba(19,111,99,.12), transparent 48%);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 36px;
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      font-size: 1.1rem;
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 7vw, 4.2rem);
+      line-height: 1;
+      letter-spacing: -0.075em;
+      max-width: 900px;
+    }
+
+    .subtitle {
+      max-width: 720px;
+      margin: 18px 0 26px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.2vw, 1.25rem);
+    }
+
+    .search-panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    #searchInput {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 18px 20px;
+      font-size: 1.06rem;
+      outline: none;
+    }
+
+    #clearBtn {
+      border: 0;
+      border-radius: 16px;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      padding: 0 18px;
+      cursor: pointer;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    .stat {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      border-radius: 999px;
+    }
+
+    main {
+      padding: 30px 0 64px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    aside, .results-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    aside {
+      position: sticky;
+      top: 16px;
+      padding: 18px;
+    }
+
+    .section-title {
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: var(--muted);
+      font-weight: 800;
+      margin: 8px 0 12px;
+    }
+
+    .filter-list, .az-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: var(--chip);
+      color: var(--chip-text);
+      border-radius: 999px;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-size: .92rem;
+      font-weight: 650;
+    }
+
+    .chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .results-card {
+      padding: 18px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+      color: var(--muted);
+    }
+
+    .term-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 14px;
+      background: linear-gradient(180deg, var(--card), rgba(127,127,127,.03));
+    }
+
+    .term-card:target {
+      outline: 3px solid var(--primary);
+      outline-offset: 3px;
+    }
+
+    .term-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .term-title {
+      font-size: 1.35rem;
+      font-weight: 850;
+      letter-spacing: -0.035em;
+      margin: 0;
+    }
+
+    .category {
+      white-space: nowrap;
+      color: var(--chip-text);
+      background: var(--chip);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .definition.empty {
+      background: var(--warning);
+      color: var(--muted);
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .meta-box {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+
+    .meta-label {
+      font-size: .78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .related {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .related a, .related span {
+      color: var(--primary-dark);
+      background: var(--chip);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 9px;
+      text-decoration: none;
+      font-weight: 650;
+      font-size: .9rem;
+    }
+
+    mark {
+      border-radius: 4px;
+      padding: 0 2px;
+      background: #fbe68b;
+      color: #172033;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 42px 16px;
+      color: var(--muted);
+    }
+
+    footer {
+      color: var(--muted);
+      text-align: center;
+      padding: 22px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 800px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+      }
+
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+
+      #clearBtn {
+        padding: 14px;
+      }
+
+      .meta {
+        grid-template-columns: 1fr;
+      }
+
+      .term-head {
+        display: block;
+      }
+
+      .category {
+        display: inline-block;
+        margin-top: 10px;
+      }
+    }
+
+    @media print {
+      .hero, aside, footer, #clearBtn, .theme-toggle {
+        display: none !important;
+      }
+      body { background: white; color: black; }
+      .layout { display: block; }
+      .results-card, .term-card { box-shadow: none; border-color: #ccc; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">Audiology Knowledge Base</div>
+        <button class="theme-toggle" id="themeToggle" type="button">Toggle dark mode</button>
+      </div>
+
+      <h1>Search audiology terms, equipment, and concepts.</h1>
+      <p class="subtitle">A quick-reference glossary designed for non-audiology sales and support professionals.</p>
+
+      <div class="search-panel">
+        <div class="search-row">
+          <input id="searchInput" type="search" placeholder="Try SRT, earmold, hearing test, AudioStar..." autocomplete="off" autofocus />
+          <button id="clearBtn" type="button">Clear</button>
+        </div>
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="layout">
+      <aside>
+        <div class="section-title">Browse by category</div>
+        <div class="filter-list" id="categoryFilters"></div>
+
+        <div class="section-title">Browse A–Z</div>
+        <div class="az-list" id="azFilters"></div>
+
+        <div class="section-title">Tips</div>
+        <p style="color: var(--muted); margin-top: 0;">Search works across keywords, explanations, related keywords, categories, and equipment.</p>
+      </aside>
+
+      <section class="results-card">
+        <div class="result-header">
+          <strong id="resultCount">Loading terms...</strong>
+          <span id="activeFilter"></span>
+        </div>
+        <div id="results"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    Edit definitions in your spreadsheet, export as <strong>definitions.csv</strong>, and replace that file in GitHub.
+  </footer>
+
+  <script>
+    let terms = [];
+    let fuse = null;
+    let activeCategory = "All";
+    let activeLetter = "All";
+    let query = "";
+
+    const els = {
+      search: document.getElementById("searchInput"),
+      clear: document.getElementById("clearBtn"),
+      results: document.getElementById("results"),
+      count: document.getElementById("resultCount"),
+      activeFilter: document.getElementById("activeFilter"),
+      categories: document.getElementById("categoryFilters"),
+      az: document.getElementById("azFilters"),
+      stats: document.getElementById("stats"),
+      theme: document.getElementById("themeToggle")
+    };
+
+    const slug = (text) =>
+      encodeURIComponent(String(text || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
+
+    const splitList = (value) =>
+      String(value || "")
+        .split(/[,;|]/)
+        .map(item => item.trim())
+        .filter(Boolean);
+
+    const escapeHtml = (value) =>
+      String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    function highlight(text) {
+      const safe = escapeHtml(text);
+      const q = query.trim();
+      if (!q) return safe;
+
+      const words = q.split(/\s+/).filter(word => word.length > 1).slice(0, 6);
+      if (!words.length) return safe;
+
+      const pattern = words.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+      return safe.replace(new RegExp(`(${pattern})`, "gi"), "<mark>$1</mark>");
+    }
+
+    function normalize(row) {
+      const keyword = row.Keyword || row.keyword || row.Term || row.term || "";
+      const explanation = row.Explanation || row.explanation || row.Definition || row.definition || "";
+      const category = row.Category || row.category || "";
+      const relatedKeywords = row["Related Keywords"] || row.relatedKeywords || "";
+      const relatedEquipment = row["Related Equipment"] || row.relatedEquipment || "";
+
+      return {
+        keyword: keyword.trim(),
+        explanation: explanation.trim(),
+        category: category.trim() || "Uncategorized",
+        relatedKeywords: relatedKeywords.trim(),
+        relatedEquipment: relatedEquipment.trim(),
+        id: slug(keyword)
+      };
+    }
+
+    function setupSearch() {
+      fuse = new Fuse(terms, {
+        keys: [
+          { name: "keyword", weight: 0.42 },
+          { name: "explanation", weight: 0.25 },
+          { name: "category", weight: 0.12 },
+          { name: "relatedKeywords", weight: 0.13 },
+          { name: "relatedEquipment", weight: 0.08 }
+        ],
+        threshold: 0.36,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+        includeScore: true
+      });
+    }
+
+    function renderStats() {
+      const categories = new Set(terms.map(t => t.category));
+      const incomplete = terms.filter(t => !t.explanation).length;
+
+      els.stats.innerHTML = `
+        <span class="stat">${terms.length} terms</span>
+        <span class="stat">${categories.size} categories</span>
+        <span class="stat">${incomplete} definitions to complete</span>
+      `;
+    }
+
+    function renderFilters() {
+      const categories = ["All", ...Array.from(new Set(terms.map(t => t.category))).sort()];
+      els.categories.innerHTML = categories.map(cat => `
+        <button class="chip ${cat === activeCategory ? "active" : ""}" data-category="${escapeHtml(cat)}">${escapeHtml(cat)}</button>
+      `).join("");
+
+      const letters = ["All", ...Array.from(new Set(terms.map(t => t.keyword[0]?.toUpperCase()).filter(Boolean))).sort()];
+      els.az.innerHTML = letters.map(letter => `
+        <button class="chip ${letter === activeLetter ? "active" : ""}" data-letter="${escapeHtml(letter)}">${escapeHtml(letter)}</button>
+      `).join("");
+    }
+
+    function relatedLinks(value) {
+      const items = splitList(value);
+      if (!items.length) return "<span>None listed yet</span>";
+
+      return items.map(item => {
+        const match = terms.find(t => t.keyword.toLowerCase() === item.toLowerCase());
+        return match
+          ? `<a href="#${match.id}" data-term="${escapeHtml(match.keyword)}">${escapeHtml(item)}</a>`
+          : `<span>${escapeHtml(item)}</span>`;
+      }).join("");
+    }
+
+    function renderResults(items) {
+      els.count.textContent = `${items.length} result${items.length === 1 ? "" : "s"}`;
+
+      const filters = [];
+      if (activeCategory !== "All") filters.push(activeCategory);
+      if (activeLetter !== "All") filters.push(activeLetter);
+      if (query) filters.push(`Search: “${query}”`);
+      els.activeFilter.textContent = filters.join(" • ");
+
+      if (!items.length) {
+        els.results.innerHTML = `<div class="empty-state">No matching terms found. Try a shorter search or clear the filters.</div>`;
+        return;
+      }
+
+      els.results.innerHTML = items.map(term => `
+        <article class="term-card" id="${term.id}">
+          <div class="term-head">
+            <h2 class="term-title">${highlight(term.keyword)}</h2>
+            <span class="category">${escapeHtml(term.category)}</span>
+          </div>
+
+          ${term.explanation
+            ? `<div class="definition">${highlight(term.explanation)}</div>`
+            : `<div class="definition empty">Definition coming soon.</div>`
+          }
+
+          <div class="meta">
+            <div class="meta-box">
+              <div class="meta-label">Related terms</div>
+              <div class="related">${relatedLinks(term.relatedKeywords)}</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-label">Related equipment</div>
+              <div class="related">${relatedLinks(term.relatedEquipment)}</div>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function getFilteredTerms() {
+      let items = terms.slice();
+
+      if (query) {
+        items = fuse.search(query).map(result => result.item);
+      } else {
+        items.sort((a, b) => a.keyword.localeCompare(b.keyword));
+      }
+
+      if (activeCategory !== "All") {
+        items = items.filter(t => t.category === activeCategory);
+      }
+
+      if (activeLetter !== "All") {
+        items = items.filter(t => t.keyword.toUpperCase().startsWith(activeLetter));
+      }
+
+      return items;
+    }
+
+    function update() {
+      renderFilters();
+      renderResults(getFilteredTerms());
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem("akb-theme");
+      if (saved === "dark") document.documentElement.dataset.theme = "dark";
+    }
+
+    async function init() {
+      loadTheme();
+
+      Papa.parse("definitions.csv", {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          terms = results.data
+            .map(normalize)
+            .filter(row => row.keyword);
+
+          setupSearch();
+          renderStats();
+          update();
+
+          if (location.hash) {
+            setTimeout(() => {
+              const target = document.querySelector(location.hash);
+              if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 250);
+          }
+        },
+        error: () => {
+          els.results.innerHTML = `<div class="empty-state">Could not load definitions.csv. Make sure it is in the same folder as index.html.</div>`;
+        }
+      });
+    }
+
+    els.search.addEventListener("input", (event) => {
+      query = event.target.value.trim();
+      update();
+    });
+
+    els.clear.addEventListener("click", () => {
+      query = "";
+      activeCategory = "All";
+      activeLetter = "All";
+      els.search.value = "";
+      update();
+      els.search.focus();
+    });
+
+    els.categories.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-category]");
+      if (!button) return;
+      activeCategory = button.dataset.category;
+      update();
+    });
+
+    els.az.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-letter]");
+      if (!button) return;
+      activeLetter = button.dataset.letter;
+      update();
+    });
+
+    els.results.addEventListener("click", (event) => {
+      const link = event.target.closest("a[data-term]");
+      if (!link) return;
+      query = link.dataset.term;
+      els.search.value = query;
+      activeCategory = "All";
+      activeLetter = "All";
+      setTimeout(update, 0);
+    });
+
+    els.theme.addEventListener("click", () => {
+      const isDark = document.documentElement.dataset.theme === "dark";
+      document.documentElement.dataset.theme = isDark ? "" : "dark";
+      localStorage.setItem("akb-theme", isDark ? "light" : "dark");
+    });
+
+    init();
+  </script>
+</body>
+</html>
