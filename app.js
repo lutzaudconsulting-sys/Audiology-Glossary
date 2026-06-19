@@ -268,3 +268,37 @@ els.theme.addEventListener('click', () => {
 loadData().catch(err => {
   els.results.innerHTML = `<div class="card"><h3>Could not load definitions.csv</h3><p>Make sure definitions.csv is uploaded in the same GitHub folder as index.html, styles.css, and app.js.</p><p>${escapeHTML(err.message)}</p></div>`;
 });
+
+
+// Footer modal behavior
+const modalTriggers = document.querySelectorAll('[data-modal]');
+const closeModalButtons = document.querySelectorAll('[data-close-modal]');
+
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  modal.querySelector('.modal-close')?.focus();
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal.open').forEach(modal => {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  });
+  document.body.classList.remove('modal-open');
+}
+
+modalTriggers.forEach(button => {
+  button.addEventListener('click', () => openModal(button.dataset.modal));
+});
+
+closeModalButtons.forEach(button => {
+  button.addEventListener('click', closeModal);
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeModal();
+});

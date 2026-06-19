@@ -67,9 +67,54 @@
     </section>
   </main>
 
-  <footer>
-    <p>Update this site by replacing <code>definitions.csv</code> in GitHub.</p>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <h2>Audiology Knowledge Base</h2>
+      <p class="footer-tagline">An independent educational resource for audiology learning and professional development.</p>
+      <p class="footer-meta">Version 1.0 · Last Updated: June 2026</p>
+      <p class="copyright-line">© 2026 Melanie Lutz. All rights reserved.</p>
+      <nav class="footer-links" aria-label="Footer links">
+        <button type="button" data-modal="aboutModal">About</button>
+        <span aria-hidden="true">•</span>
+        <button type="button" data-modal="disclaimerModal">Disclaimer</button>
+        <span aria-hidden="true">•</span>
+        <button type="button" data-modal="copyrightModal">Copyright</button>
+      </nav>
+    </div>
   </footer>
+
+  <div id="aboutModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <h2 id="aboutTitle">About the Audiology Knowledge Base</h2>
+      <p>The Audiology Knowledge Base was created by <strong>Melanie Lutz</strong> as an independent educational resource designed to simplify audiology concepts for sales professionals, industry partners, and others seeking to expand their understanding of hearing healthcare.</p>
+      <p>By combining clinical terminology with plain-language explanations, practical selling strategies, common customer questions, and curated educational resources, the Knowledge Base bridges the gap between technical information and real-world application.</p>
+      <p>This resource is intended to support learning and professional development and will continue to evolve as new content and educational materials are added.</p>
+    </section>
+  </div>
+
+  <div id="disclaimerModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <h2 id="disclaimerTitle">Disclaimer</h2>
+      <p>The Audiology Knowledge Base is intended solely as an educational and training resource. The information provided is designed to help users better understand audiology concepts, terminology, equipment, and related topics.</p>
+      <p>This website is <strong>not intended to provide medical advice, diagnose medical conditions, recommend treatment, or replace the independent clinical judgment of licensed healthcare professionals</strong>. Users should always consult qualified healthcare providers, applicable clinical guidelines, manufacturer instructions for use (IFUs), and their organization's policies when making patient care decisions.</p>
+      <p>While every effort has been made to provide accurate and up-to-date information, no guarantee is made regarding the completeness, accuracy, or applicability of the content. The author assumes no responsibility for errors, omissions, or any outcomes resulting from the use of this information.</p>
+    </section>
+  </div>
+
+  <div id="copyrightModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="copyrightTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <h2 id="copyrightTitle">Copyright</h2>
+      <p>© 2026 Melanie Lutz. All rights reserved.</p>
+      <p>The Audiology Knowledge Base, including its original text, definitions, explanations, educational materials, plain-language summaries, sales guidance, organization, design, and related content, is protected by United States copyright law.</p>
+      <p>No portion of this website may be copied, reproduced, distributed, republished, or incorporated into another work without prior written permission from the copyright owner, except as otherwise permitted by applicable law.</p>
+    </section>
+  </div>
 
   <script src="app.js"></script>
 </body>
