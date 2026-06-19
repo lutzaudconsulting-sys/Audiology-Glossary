@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Audiology Knowledge Base</title>
-  <meta name="description" content="A searchable audiology glossary for non-audiology representatives." />
+  <meta name="description" content="A searchable audiology knowledge base for non-audiology representatives." />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
 </head>
@@ -17,12 +17,12 @@
 
     <section class="hero-content">
       <p class="eyebrow">Plain-language audiology reference</p>
-      <h1>Find terms, definitions, equipment, and related concepts fast.</h1>
-      <p class="subheading">Designed for non-audiology reps who need quick, practical explanations.</p>
+      <h1>Search terms, customer questions, equipment, and sales conversation starters.</h1>
+      <p class="subheading">A practical knowledge base for reps who need fast, approachable audiology explanations.</p>
 
       <div class="search-panel">
-        <label for="searchInput" class="sr-only">Search terms</label>
-        <input id="searchInput" type="search" placeholder="Search SRT, tympanometry, speech testing, equipment..." autocomplete="off" />
+        <label for="searchInput" class="sr-only">Search the knowledge base</label>
+        <input id="searchInput" type="search" placeholder="Search SRT, ear mold, REM, equipment, customer questions..." autocomplete="off" />
         <div id="suggestions" class="suggestions" aria-live="polite"></div>
       </div>
 
@@ -45,6 +45,7 @@
         <h2>Library Stats</h2>
         <div class="stat"><strong id="totalTerms">0</strong><span>Terms</span></div>
         <div class="stat"><strong id="totalCategories">0</strong><span>Categories</span></div>
+        <div class="stat"><strong id="totalEquipment">0</strong><span>Equipment tags</span></div>
       </section>
     </aside>
 
@@ -61,7 +62,7 @@
       <div id="results" class="cards"></div>
       <div id="emptyState" class="empty hidden">
         <h3>No matches found</h3>
-        <p>Try a different spelling, related concept, equipment name, or broader search term.</p>
+        <p>Try a different spelling, related concept, equipment name, manufacturer, or customer question.</p>
       </div>
     </section>
   </main>
